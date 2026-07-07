@@ -7,7 +7,7 @@ import { useToast } from "@/components/shared/toast";
 import { useRole } from "@/components/shared/role-context";
 import { TICKET_STATUS_META, EXCEPTION_META, type ExceptionType } from "@/types";
 import { formatDateTime } from "@/lib/utils";
-import { isOverdue, isApproachingOverdue } from "@/lib/approval-engine";
+import { isOverdue, isApproachingOverdue } from "@/lib/utils";
 import { CheckSquare, Check, X, Loader2, Clock, ArrowRight } from "lucide-react";
 
 export default function ApprovalPage() {

@@ -47,3 +47,18 @@ export function chunk<T>(arr: T[], size: number): T[][] {
   }
   return chunks;
 }
+
+/** 工单是否已超时（基于 dueAt） —— 纯函数，客户端可安全使用 */
+export function isOverdue(dueAt: Date | string | null): boolean {
+  if (!dueAt) return false;
+  return new Date(dueAt).getTime() < Date.now();
+}
+
+/** 即将超时（剩余 2 小时内）—— 列表角标用 */
+export function isApproachingOverdue(dueAt: Date | string | null): boolean {
+  if (!dueAt) return false;
+  const due = new Date(dueAt).getTime();
+  const now = Date.now();
+  const TWO_HOURS = 2 * 60 * 60_000;
+  return due > now && due - now < TWO_HOURS;
+}

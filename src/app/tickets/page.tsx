@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { getTicketsPage } from "@/lib/server-actions";
 import { TICKET_STATUS_META, EXCEPTION_META, EXCEPTION_SOURCE_META, type TicketStatus, type ExceptionType } from "@/types";
-import { isOverdue, isApproachingOverdue } from "@/lib/approval-engine";
+import { isOverdue, isApproachingOverdue } from "@/lib/utils";
 import { formatDateTime } from "@/lib/utils";
 import { Search, ChevronLeft, ChevronRight, AlertCircle, Clock } from "lucide-react";
 

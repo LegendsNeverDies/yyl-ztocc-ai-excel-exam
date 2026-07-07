@@ -34,17 +34,4 @@ export async function getResubmitLimit(): Promise<number> {
   return (await getConfigNumber(CONFIG_KEYS.resubmitLimit)) || 3;
 }
 
-/** 工单是否已超时（基于 dueAt） */
-export function isOverdue(dueAt: Date | string | null): boolean {
-  if (!dueAt) return false;
-  return new Date(dueAt).getTime() < Date.now();
-}
-
-/** 即将超时（剩余 2 小时内）—— 列表角标用 */
-export function isApproachingOverdue(dueAt: Date | string | null): boolean {
-  if (!dueAt) return false;
-  const due = new Date(dueAt).getTime();
-  const now = Date.now();
-  const TWO_HOURS = 2 * 60 * 60_000;
-  return due > now && due - now < TWO_HOURS;
-}
+// 注：isOverdue / isApproachingOverdue 已移至 @/lib/utils（纯函数，供客户端安全使用，避免拉入 db 链）

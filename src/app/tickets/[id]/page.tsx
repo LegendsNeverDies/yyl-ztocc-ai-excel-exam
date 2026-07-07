@@ -6,7 +6,7 @@ import { getTicketDetail, approveTicket, rejectTicket, quickRelease, resubmitTic
 import { useToast } from "@/components/shared/toast";
 import { useRole } from "@/components/shared/role-context";
 import { TICKET_STATUS_META, EXCEPTION_META, EXCEPTION_SOURCE_META, EXCEPTION_ACTION_MAP, type TicketStatus, type ExceptionType } from "@/types";
-import { isOverdue } from "@/lib/approval-engine";
+import { isOverdue } from "@/lib/utils";
 import { formatDateTime } from "@/lib/utils";
 import { ArrowLeft, Loader2, Check, X, Zap, RefreshCw, Package, AlertCircle, History, Coins, ScanLine } from "lucide-react";
 
