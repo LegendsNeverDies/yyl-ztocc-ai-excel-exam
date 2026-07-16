@@ -112,7 +112,7 @@ async function upsertSnapshot(wb: {
   await sql`DELETE FROM v3_waybill_snapshots WHERE waybill_code = ${wb.externalCode}`;
   await sql`
     INSERT INTO v3_waybill_snapshots (waybill_code, store_name, receiver_name, receiver_phone, receiver_address, sku_count, total_quantity, amount, synced_at, sync_source, raw_json)
-    VALUES (${wb.externalCode}, ${wb.storeName}, ${wb.receiverName}, ${wb.receiverPhone}, ${wb.receiverAddress}, ${wb.skuCount ?? 0}, ${wb.totalQuantity ?? "0"}, "0", now(), ${source}, ${rawJson}::jsonb)
+    VALUES (${wb.externalCode}, ${wb.storeName}, ${wb.receiverName}, ${wb.receiverPhone}, ${wb.receiverAddress}, ${wb.skuCount ?? 0}, ${wb.totalQuantity ?? "0"}, ${0}, now(), ${source}, ${rawJson}::jsonb)
   `;
 }
 

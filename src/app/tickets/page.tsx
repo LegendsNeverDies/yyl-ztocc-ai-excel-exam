@@ -96,17 +96,17 @@ export default function TicketsPage() {
                 <tr><td colSpan={10} className="py-10 text-center text-sm text-[#86909c]">暂无工单</td></tr>
               ) : rows.map((r) => {
                 const st = r.status as TicketStatus;
-                const et = r.exception_type as ExceptionType;
-                const src = r.exception_source as "scan" | "manual";
-                const dueAt = r.due_at as string | null;
+                const et = r.exceptionType as ExceptionType;
+                const src = r.exceptionSource as "scan" | "manual";
+                const dueAt = r.dueAt as string | null;
                 const overdue = isOverdue(dueAt) && ["pending", "level1_reviewing", "level2_reviewing"].includes(st);
                 const near = isApproachingOverdue(dueAt) && ["pending", "level1_reviewing", "level2_reviewing"].includes(st);
                 return (
                   <tr key={r.id as string}>
-                    <td className="whitespace-nowrap font-mono text-xs">{r.ticket_no as string}</td>
-                    <td className="whitespace-nowrap font-mono text-xs">{r.waybill_code as string}</td>
+                    <td className="whitespace-nowrap font-mono text-xs">{r.ticketNo as string}</td>
+                    <td className="whitespace-nowrap font-mono text-xs">{r.waybillCode as string}</td>
                     <td className="text-xs">{EXCEPTION_META[et]?.label ?? et}</td>
-                    <td><span className={`tag ${EXCEPTION_SOURCE_META[src].tag}`}>{EXCEPTION_SOURCE_META[src].label}</span></td>
+                    <td><span className={`tag ${EXCEPTION_SOURCE_META[src]?.tag ?? "tag-gray"}`}>{EXCEPTION_SOURCE_META[src]?.label ?? src}</span></td>
                     <td>
                       <span className={`tag ${TICKET_STATUS_META[st].tag}`}>
                         {overdue && <Clock className="mr-1 inline h-3 w-3" />}
@@ -115,9 +115,9 @@ export default function TicketsPage() {
                       </span>
                     </td>
                     <td className="text-center text-xs font-medium text-[#0b6e6e]">¥{Number(r.amount ?? 0).toFixed(2)}</td>
-                    <td className="text-center text-xs">{String(r.current_level ?? "-")}</td>
-                    <td className="text-xs">{r.reported_by_name as string}</td>
-                    <td className="whitespace-nowrap text-xs">{formatDateTime(r.reported_at as string)}</td>
+                    <td className="text-center text-xs">{String(r.currentLevel ?? "-")}</td>
+                    <td className="text-xs">{r.reportedByName as string}</td>
+                    <td className="whitespace-nowrap text-xs">{formatDateTime(r.reportedAt as string)}</td>
                     <td className="text-center">
                       <Link href={`/tickets/${r.id as string}`} className="btn-ghost gap-1 text-xs text-[#0fc6c2]">详情</Link>
                     </td>

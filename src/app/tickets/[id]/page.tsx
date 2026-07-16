@@ -29,6 +29,7 @@ export default function TicketDetailPage() {
   const [comment, setComment] = useState("");
   const [quickReason, setQuickReason] = useState("");
   const [acting, setActing] = useState(false);
+  const [confirm, setConfirm] = useState<{ title: string; desc: string; danger?: boolean; fn: () => Promise<{ success: boolean; message: string }> } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,6 +74,13 @@ export default function TicketDetailPage() {
     } finally {
       setActing(false);
     }
+  };
+
+  // 二次确认：先弹出确认框，用户显式确认后才真正执行（防止误操作）
+  const runConfirmed = async () => {
+    const fn = confirm?.fn;
+    setConfirm(null);
+    if (fn) await act(fn);
   };
 
   return (
@@ -171,8 +179,8 @@ export default function TicketDetailPage() {
                 <div className="space-y-2">
                   <textarea className="input-field text-sm" rows={3} placeholder="审批意见..." value={comment} onChange={(e) => setComment(e.target.value)} />
                   <div className="flex gap-2">
-                    <button onClick={() => act(() => approveTicket({ ticketId: t.id as string, comment, requestId: crypto.randomUUID() }))} disabled={acting} className="btn-primary flex-1 gap-1 text-sm"><Check className="h-4 w-4" />通过</button>
-                    <button onClick={() => act(() => rejectTicket({ ticketId: t.id as string, comment, requestId: crypto.randomUUID() }))} disabled={acting} className="btn-danger flex-1 gap-1 text-sm"><X className="h-4 w-4" />拒绝</button>
+                    <button onClick={() => setConfirm({ title: "确认通过审批", desc: `工单 ${t.ticket_no} 将通过审批并进入下一流程${comment ? `，审批意见：${comment}` : "（无审批意见）"}`, fn: () => approveTicket({ ticketId: t.id as string, comment, requestId: crypto.randomUUID() }) })} disabled={acting} className="btn-primary flex-1 gap-1 text-sm"><Check className="h-4 w-4" />通过</button>
+                    <button onClick={() => setConfirm({ title: "确认拒绝工单", desc: `工单 ${t.ticket_no} 将被拒绝${comment ? `，拒绝原因：${comment}` : "（未填写原因）"}`, danger: true, fn: () => rejectTicket({ ticketId: t.id as string, comment, requestId: crypto.randomUUID() }) })} disabled={acting} className="btn-danger flex-1 gap-1 text-sm"><X className="h-4 w-4" />拒绝</button>
                   </div>
                   <p className="text-[10px] text-[#86909c]">并发保护：若他人已处理将提示刷新；重复点击幂等</p>
                 </div>
@@ -181,7 +189,7 @@ export default function TicketDetailPage() {
                 <div className="space-y-2 border-t border-[#e5e6eb] pt-3">
                   <p className="text-xs font-medium text-[#BA7517]">品控主管误判快速放行（绕过审批，需留痕）</p>
                   <input className="input-field text-sm" placeholder="复核原因..." value={quickReason} onChange={(e) => setQuickReason(e.target.value)} />
-                  <button onClick={() => act(() => quickRelease({ ticketId: t.id as string, reason: quickReason, requestId: crypto.randomUUID() }))} disabled={acting || !quickReason} className="btn-outline w-full gap-1 text-sm"><Zap className="h-4 w-4" />快速放行</button>
+                  <button onClick={() => setConfirm({ title: "确认快速放行", desc: `工单 ${t.ticket_no} 将绕过审批直接放行并关闭（品控主管误判），复核原因：${quickReason}`, danger: true, fn: () => quickRelease({ ticketId: t.id as string, reason: quickReason, requestId: crypto.randomUUID() }) })} disabled={acting || !quickReason} className="btn-outline w-full gap-1 text-sm"><Zap className="h-4 w-4" />快速放行</button>
                 </div>
               )}
               {canResubmit && (
@@ -227,6 +235,26 @@ export default function TicketDetailPage() {
           )}
         </div>
       </div>
+
+      {/* 审批二次确认弹窗 */}
+      {confirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => !acting && setConfirm(null)}>
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-2 flex items-center gap-2">
+              <AlertCircle className={`h-5 w-5 ${confirm.danger ? "text-[#cf1322]" : "text-[#0fc6c2]"}`} />
+              <h3 className="text-base font-semibold text-[#1d2129]">{confirm.title}</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-[#4e5969]">{confirm.desc}</p>
+            <p className="mt-2 text-[11px] text-[#86909c]">该操作将写入审计日志，且幂等防重复；请确认无误后提交。</p>
+            <div className="mt-5 flex gap-2">
+              <button onClick={() => setConfirm(null)} disabled={acting} className="btn-ghost flex-1 text-sm">取消</button>
+              <button onClick={runConfirmed} disabled={acting} className={`flex-1 text-sm ${confirm.danger ? "btn-danger" : "btn-primary"}`}>
+                {acting ? "处理中..." : "确认提交"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
