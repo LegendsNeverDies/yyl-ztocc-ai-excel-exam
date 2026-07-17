@@ -7,6 +7,16 @@ import { TICKET_STATUS_META, EXCEPTION_META, EXCEPTION_SOURCE_META, type TicketS
 import { isOverdue, isApproachingOverdue } from "@/lib/utils";
 import { formatDateTime } from "@/lib/utils";
 import { Search, ChevronLeft, ChevronRight, AlertCircle, Clock } from "lucide-react";
+import { useRole } from "@/components/shared/role-context";
+
+function RoleAwareApprovalLink() {
+  const { hasRole } = useRole();
+  const canApprove = hasRole("approver1", "approver2");
+  if (!canApprove) return null;
+  return (
+    <a href="/approval" className="btn-ghost border rounded px-3 py-2 text-sm text-[#0fc6c2]">待我审批</a>
+  );
+}
 
 export default function TicketsPage() {
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
@@ -43,8 +53,17 @@ export default function TicketsPage() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#1d2129]">异常工单列表</h1>
-        <p className="mt-1 text-sm text-[#86909c]">共 {total} 条 · 支持按状态/类型/运单号筛选 · 超时工单红色角标</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-[#1d2129]">异常工单列表</h1>
+            <p className="mt-1 text-sm text-[#86909c]">共 {total} 条 · 支持按状态/类型/运单号筛选 · 超时工单红色角标</p>
+          </div>
+          {/* 审批入口，仅对有审批权限用户可见 */}
+          <div>
+            {/* useRole 在 client component 中可用 */}
+            <RoleAwareApprovalLink />
+          </div>
+        </div>
       </div>
 
       {/* 筛选栏 */}
