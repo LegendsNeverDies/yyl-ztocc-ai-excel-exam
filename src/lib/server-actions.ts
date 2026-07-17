@@ -460,12 +460,25 @@ export async function getDashboardStats(): Promise<{ byStatus: Record<string, nu
   const syncRows = await sql`SELECT count(*)::int AS c, count(*) FILTER (WHERE success=true)::int AS ok FROM v3_sync_logs WHERE called_at > now() - interval '24 hours'`;
   const syncTotal = (syncRows[0] as { c: number }).c;
   const syncOk = (syncRows[0] as { ok: number }).ok;
+  // 按 error type 聚合（来自 error_message JSON 的 type 字段）
+  const errorTypeRows = await sql`
+    SELECT (CASE WHEN (error_message::json->>'type') IS NULL OR (error_message::json->>'type') = '' THEN 'unknown' ELSE (error_message::json->>'type') END) AS t, count(*)::int AS c
+    FROM v3_sync_logs
+    WHERE called_at > now() - interval '24 hours'
+    GROUP BY t
+    ORDER BY c DESC
+  `;
+  const syncErrorByType: Record<string, number> = {};
+  for (const r of errorTypeRows as { t: string; c: number }[]) {
+    syncErrorByType[r.t] = r.c;
+  }
   return {
     byStatus,
     total,
     overdue: (overdueRows[0] as { c: number }).c,
     syncSuccessRate: syncTotal > 0 ? Math.round((syncOk / syncTotal) * 100) : 100,
     syncTotal,
+    syncErrorByType,
   };
 }
 

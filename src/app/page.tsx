@@ -64,6 +64,30 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* 接口失败分类（24h） */}
+      <div className="mb-6 grid gap-4 sm:grid-cols-1 lg:grid-cols-1">
+        <div className="card !p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-[#86909c]">接口失败分类（24h）</span>
+            <Zap className="h-4 w-4 text-[#0fc6c2]" />
+          </div>
+          <div className="mt-3">
+            {stats && stats.syncErrorByType ? (
+              <div className="space-y-2 text-sm text-[#4e5969]">
+                {Object.entries(stats.syncErrorByType).map(([t, c]) => (
+                  <div key={t} className="flex items-center justify-between">
+                    <div className="capitalize">{t.replace(/_/g, ' ')}</div>
+                    <div className="font-medium">{c}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-[#86909c]">暂无数据</div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
         {/* 工单状态分布 */}
         <div className="card">
