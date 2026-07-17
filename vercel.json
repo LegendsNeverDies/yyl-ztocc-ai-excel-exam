@@ -2,5 +2,8 @@
   "buildCommand": "next build",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "regions": ["hkg1"]
+  "regions": ["hkg1"],
+  "env": {
+    "NODE_OPTIONS": "--max-old-space-size=4096"
+  }
 }
