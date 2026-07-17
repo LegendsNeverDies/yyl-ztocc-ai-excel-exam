@@ -126,3 +126,4 @@ CURRENT_ROLE=operator                  # 默认角色（cookie 缺失时用）
 1. 状态机扩展性（新增异常类型只需加 EXCEPTION_META 映射，不改状态机）
 2. 规模化（200 条已验证，20 万条需加分库分表 + 异步任务，`triggerTimeoutCheck` 的全表扫描是最先撑不住的环节）
 3. 老系统兼容（V2 接口版本策略 + 字段向后兼容，见 ASSUMPTIONS.md）
+
