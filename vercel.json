@@ -1,10 +1,6 @@
 {
-  "version": 3,
+  "buildCommand": "next build",
   "framework": "nextjs",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ]
+  "installCommand": "npm install",
+  "regions": ["hkg1"]
 }
