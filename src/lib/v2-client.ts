@@ -20,9 +20,25 @@ interface LogEntry {
 
 async function writeLog(entry: LogEntry): Promise<void> {
   try {
+    // 增加错误类型分类，写入时把 type 与原始错误信息合并为 JSON 字符串存入 error_message，方便后续统计
+    const classify = (entry: LogEntry) => {
+      if (!entry.success) {
+        if (entry.errorMessage?.includes("未配置") || entry.errorMessage?.includes("V2_API_BASE_URL") || entry.errorMessage?.includes("V2_API_KEY")) return "config_missing";
+        if (entry.errorMessage?.startsWith("超时") || entry.errorMessage?.includes("AbortError") || entry.durationMs > ((Number(process.env.V2_API_TIMEOUT_MS) || 8000) + 1000)) return "timeout";
+        if (entry.responseStatus === 0) return "network";
+        if (entry.responseStatus === 404) return "not_found";
+        if (entry.responseStatus >= 500) return "server_error";
+        if (entry.responseStatus >= 400) return "client_error";
+        return "other";
+      }
+      return "ok";
+    };
+    const errorType = classify(entry);
+    const errorPayload = entry.errorMessage ? JSON.stringify({ type: errorType, message: entry.errorMessage }) : JSON.stringify({ type: errorType });
+
     await sql`
       INSERT INTO v3_sync_logs (request_id, called_at, api_name, params_summary, response_status, success, duration_ms, error_message, direction)
-      VALUES (${entry.requestId}, now(), ${entry.apiName}, ${entry.paramsSummary}, ${entry.responseStatus}, ${entry.success}, ${entry.durationMs}, ${entry.errorMessage}, 'v3_to_v2')
+      VALUES (${entry.requestId}, now(), ${entry.apiName}, ${entry.paramsSummary}, ${entry.responseStatus}, ${entry.success}, ${entry.durationMs}, ${errorPayload}, 'v3_to_v2')
     `;
   } catch {
     // 日志写入失败不影响主流程
