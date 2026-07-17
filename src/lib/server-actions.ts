@@ -447,7 +447,7 @@ export async function getTicketDetail(ticketId: string): Promise<{ ticket: unkno
 }
 
 // ==================== 工作台统计 ====================
-export async function getDashboardStats(): Promise<{ byStatus: Record<string, number>; total: number; overdue: number; syncSuccessRate: number; syncTotal: number }> {
+export async function getDashboardStats(): Promise<{ byStatus: Record<string, number>; total: number; overdue: number; syncSuccessRate: number; syncTotal: number; syncErrorByType: Record<string, number> }> {
   await triggerTimeoutCheck().catch(() => ({ processed: 0 }));
   const statusRows = await sql`SELECT status, count(*)::int AS c FROM v3_tickets GROUP BY status`;
   const byStatus: Record<string, number> = {};
