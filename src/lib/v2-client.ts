@@ -142,6 +142,8 @@ export interface FetchResult {
   source: "realtime" | "fallback";
   requestId?: string;
   error?: string;
+  /** V2 接口正常返回 404（运单号在 V2 中不存在），区别于真正的服务异常 */
+  notFound?: boolean;
 }
 
 /**
@@ -164,6 +166,8 @@ export async function fetchWaybillByCode(
     }
     return { data: detail, source: "realtime", requestId };
   } catch (e) {
+    const msg = (e as Error).message;
+    const notFound = msg.includes("404");
     if (opts?.allowCache) {
       const snap = await getSnapshot(code);
       if (snap) {
@@ -182,11 +186,12 @@ export async function fetchWaybillByCode(
             skus: [],
           },
           source: "fallback",
-          error: (e as Error).message,
+          error: msg,
+          notFound,
         };
       }
     }
-    return { data: null, source: "fallback", error: (e as Error).message };
+    return { data: null, source: "fallback", error: msg, notFound };
   }
 }
 

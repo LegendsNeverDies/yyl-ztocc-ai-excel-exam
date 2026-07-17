@@ -37,8 +37,12 @@ export default function ReportPage() {
     try {
       const res = await getWaybillForReport(code);
       setSource(res.source);
-      if (res.error && res.source === "fallback") {
-        setError("V2 服务不可用：" + res.error + "。发起上报必须实时校验运单，请稍后重试。");
+      if (res.notFound) {
+        // V2 接口正常，但运单号在 V2 中查不到 → 业务提示（核对运单号）
+        setError(`运单 ${code} 在 V2 中不存在，请核对运单号是否正确后重试`);
+      } else if (res.error) {
+        // V2 真正连不上 / 报错（5xx、超时、鉴权失败等）→ 服务不可用提示
+        setError("V2 服务暂时不可用，发起上报需实时校验运单，请稍后重试");
       } else if (!res.data || !res.data.exists) {
         setError(`运单 ${code} 不存在（V2 实时校验）`);
       } else {
